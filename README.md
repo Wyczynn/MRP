@@ -2,7 +2,7 @@
 Program jest case sensitive oraz wrażliwy na liczbę mnogą więc prosimy o zachowanie jednolitości we wprowadzanych nazwach!!!
 
 OBSŁUGA 1. OKNA:\
-Po włączeniu programu wprowadź nazwę końcowego produktu, ilość dni jaka jest potrzebna na jego wykonanie oraz ilość sztuk w magazynie.\
+Po włączeniu programu MRP.exe wprowadź nazwę końcowego produktu, ilość dni jaka jest potrzebna na jego wykonanie oraz ilość sztuk w magazynie.\
 Następnie pojedynczo wprowadź składniki głównego produktu. Wpisz jeden i wybierz liczbę sztuk z której składa się 1 końcowy produkt, kliknij przycisk "Add Ingredient".\
 Dodawane składniki pokażą się w małej tabelce poniżej.\
 Powtórz czynność dla reszty składników. Po dodaniu składników kliknij przycisk "Add product".\
