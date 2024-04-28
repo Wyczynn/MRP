@@ -1,4 +1,5 @@
 import PySimpleGUI as sg
+import pandas as pd
 
 class Product:
     products = []
@@ -11,10 +12,9 @@ class Product:
 
         Product.products.append(self)
     
-    def __str__(self):
-        return f"{self.name}, in storage {self.volume}, Ingredients:{self.ingredients}"
-
     def Craft(self, requested_volume, ready_on):
+        #update storage ammount of ingredient
+        craft_volume = requested_volume - self.volume
         start_crafting = ready_on - self.craft_time
 
         if self.ingredients:
@@ -29,38 +29,40 @@ class Product:
 
                 #check if ingredient is in product list and is an instance of class Product
                 if ingredient in Product.products and isinstance(ingredient, Product):
-                    #caluclate the volume to craft and update storage ammount of ingredient
-                    if ingredient.volume > ingredient_volume * requested_volume:
-                        volume_to_craft = 0
-                        ingredient.volume -= ingredient_volume * requested_volume
-                    else:
-                        volume_to_craft = ingredient_volume * requested_volume - ingredient.volume
-                        ingredient_volume = 0
+                    #caluclate the volume to craft
+                    volume_to_craft = ingredient_volume * craft_volume
 
                     #start crafting of the ingredient, start_crafting is when current product needs to start crafting ie. on when the ingredient needs to be ready
                     if volume_to_craft > 0:
                         ingredient.Craft(volume_to_craft, start_crafting)
-        print(f"{requested_volume} {self} started crafting on {start_crafting} week")
+
+        Table.time.append([self.name, requested_volume, ready_on, craft_volume, start_crafting])
 
 class Table:
     td = []
     Ingredients = []
-    Ingredients_Table = []     
+    Ingredients_Table = []
+    time = []
 def setup():
 
     layout = [[sg.Text("Input you product information")],
-            [sg.Text("Name", size=(15,1)), sg.InputText(key="Name")],
-            [sg.Text("Time to produce", size=(15,1)), sg.InputText(key="craft_time")],
-            [sg.Text("Ammount in storage", size=(15,1)), sg.InputText(key="starting_volume")],
-            [sg.Text("Ingredients", size=(15,1)), sg.InputText(key="ingredient_Name"),
+            [sg.Text("Name", size=(20,1)), sg.InputText(key="Name")],
+            [sg.Text("Time to produce(days)", size=(20,1)), sg.InputText(key="craft_time")],
+            [sg.Text("Ammount in storage", size=(20,1)), sg.InputText(key="starting_volume")],
+            [sg.Text("Ingredients", size=(20,1)), sg.InputText(key="ingredient_Name"),
                                                   sg.Spin([i for i in range(0, 99)], initial_value=1, key="ingredient_volume"),
                                                   sg.Button("Add ingredient")],
             [sg.Table(Table.Ingredients_Table, ["Name", "Ammount"], key = "ingredients_table", row_height=20, num_rows=2)],
-            [sg.Button("Submit"), sg.Button("Clear Input"), sg.Button("Clear Table"), sg.Button("Cancel")],
+            [sg.Button("Add Product"), sg.Button("Clear Input"), sg.Button("Clear Table"), sg.Button("Cancel"), sg.Button("Submit")],
             [sg.Table(Table.td, ["Name", "Time to produce", "Ammount in storage", "Ingredients"], key = "my_table")]]
 
+    layout2 = [[sg.Table(Table.td, ["Name", "Time to produce", "Ammount in storage", "Ingredients"], key = "my_table")],
+               [sg.Text("Name of the main item"), sg.InputText(key="name")],
+               [sg.Text("Requested ammount"), sg.InputText(key="volume")],
+               [sg.Text("Delivery date"), sg.InputText(key="delivery")],
+               [sg.Button("Cancel"), sg.Button("Craft")]]
     # Create the Window
-    window = sg.Window('Hello Example', layout)
+    window = sg.Window('MRP2000', layout)
 
     def Clear_input():
         window["Name"]("")
@@ -92,7 +94,7 @@ def setup():
         event, values = window.read()
         
         # if user closes window or clicks cancel
-        if event == sg.WIN_CLOSED or event == "Cancel":
+        if event == sg.WIN_CLOSED or event == "Cancel" or event == "Submit":
             break
         if event == "Clear Input":
             Clear_input()
@@ -103,36 +105,41 @@ def setup():
         if event == "Add ingredient":
             Add_ingredient()
 
-        if event == "Submit":
+        if event == "Add Product":
             Table.td.append([values["Name"], values["craft_time"], values["starting_volume"], Table.Ingredients])
             window["my_table"].update(values = Table.td)
             Clear_input()
-
-
-
     window.close()
+
+    #create window to specify what to craft
+    window = sg.Window('MRP2000', layout2)
+    for product in Table.td:
+        Product(product[0], product[1], product[2], product[3])
+
+    while True:
+        event, values = window.read()
+
+        if event == "Craft":
+
+            item_to_craft = list(filter(lambda x: x.name == values["name"], Product.products))[0]
+            if isinstance(item_to_craft, Product):
+                item_to_craft.Craft(int(values["volume"]), int(values["delivery"]))
+            else:
+                print("hello")
+            break
+
+        if event == sg.WIN_CLOSED or event == "Cancel" or event == "Submit":
+            break
+
 
 def main():
     setup()
-    
-    '''
-    leg = Product("leg", 1, 2)
-    desk = Product("desk", 2, 1)
-    chair = Product("Chair", 3, 0, [{'leg': 4}, {'desk': 1}])
-    chair.Craft(4, 8)
-    '''
-    
-    products = []
-    #start wtih last product
-    td = Table.td[::-1]
-    for product in td:
-        products.append(Product(product[0], product[1], product[2], product[3]))
-    for product in Product.products:
-        print(product)
-        
 
-    products[-1].Craft(4, 8)
+    time_df = pd.DataFrame(Table.time, columns=["Product", "Requested volume", "Ready on", "Volume to craft", "Start crafting"])
+    df = pd.DataFrame(Table.td, columns=["Product", "Crafting Time", "In storage", "Ingredients"])
+
+    with pd.ExcelWriter('Product.xlsx') as writer:
+        df.to_excel(writer, sheet_name='Production', startrow=1, startcol=0)
+        time_df.to_excel(writer, sheet_name='Production', startrow=1+len(df)+3, startcol=0)
     
-
-
 main()
