@@ -15,7 +15,13 @@ class Product:
     def Craft(self, requested_volume, ready_on):
         #update storage ammount of ingredient
         craft_volume = requested_volume - self.volume
+        if craft_volume <= 0:
+            Table.time.append([self.name, requested_volume, ready_on, 0, 0])
+            return
         start_crafting = ready_on - self.craft_time
+        if start_crafting < 0:
+            Table.time = [["WRONG INPUT", "WRONG INPUT", "WRONG INPUT", "WRONG INPUT", "WRONG INPUT"]]
+            return
 
         if self.ingredients:
             #iterate over all ingredients specified when definid this product
@@ -25,16 +31,18 @@ class Product:
                 ingredient_volume = list(ingredient_dict.values())[0]
 
                 #get the ingredient of the given name
-                ingredient = list(filter(lambda x: x.name == ingredient_name, Product.products))[0]
+                product_list = list(filter(lambda x: x.name == ingredient_name, Product.products))
+                if product_list:
+                    ingredient = product_list[0]
 
-                #check if ingredient is in product list and is an instance of class Product
-                if ingredient in Product.products and isinstance(ingredient, Product):
-                    #caluclate the volume to craft
-                    volume_to_craft = ingredient_volume * craft_volume
+                    #check if ingredient is in product list and is an instance of class Product
+                    if ingredient in Product.products and isinstance(ingredient, Product):
+                        #caluclate the volume to craft
+                        volume_to_craft = ingredient_volume * craft_volume
 
-                    #start crafting of the ingredient, start_crafting is when current product needs to start crafting ie. on when the ingredient needs to be ready
-                    if volume_to_craft > 0:
-                        ingredient.Craft(volume_to_craft, start_crafting)
+                        #start crafting of the ingredient, start_crafting is when current product needs to start crafting ie. on when the ingredient needs to be ready
+                        if volume_to_craft > 0:
+                            ingredient.Craft(volume_to_craft, start_crafting)
 
         Table.time.append([self.name, requested_volume, ready_on, craft_volume, start_crafting])
 
@@ -94,7 +102,10 @@ def setup():
         event, values = window.read()
         
         # if user closes window or clicks cancel
-        if event == sg.WIN_CLOSED or event == "Cancel" or event == "Submit":
+        if event == sg.WIN_CLOSED or event == "Cancel":
+            window.close()
+            return
+        if event == "Submit":
             break
         if event == "Clear Input":
             Clear_input()
