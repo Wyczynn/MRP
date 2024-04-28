@@ -12,12 +12,12 @@ Kliknij przycisk "Add product".\
 Powtórz czynność dla reszty składników.\
 Teraz główny produkt oraz składniki powinny wyświetlać się w dużej tabeli na dole.\
 W razie pomyłki należy kliknąć przycisk "Clear input" lub "Clear Table".\
-Po skończeniu wprowadzania kliknij przycisk "Submit".\
+Po skończeniu wprowadzania kliknij przycisk "Submit".
 
 OBSŁUGA 2. OKNA:\
 Wprowadź nazwę produktu końcowego.\
 Wprowadź ilość jaką chcesz zamówić.\
 Wprowadź ilość dni za jaką chcesz otrzymać zamówienie.\
-Kliknij przycisk "Craft".\
+Kliknij przycisk "Craft".
 
 Wyniki zapisują się w pliu Excel :D
