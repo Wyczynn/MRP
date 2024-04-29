@@ -1,3 +1,5 @@
+# Autorzy <3: Gabriela Socha i Michał Wyczyński
+
 # MRP
 Program jest case sensitive oraz wrażliwy na liczbę mnogą więc prosimy o zachowanie jednolitości we wprowadzanych nazwach!!!
 
